@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resume</title>
+    <style>
+        {{ css_content|safe }}
+    </style>
+</head>
+<body>
+    <div class="resume">
+        <!-- Header -->
+        <div class="header">
+            <h1>{{ personal_info.name or '' }}</h1>
+            <div class="contact-info">
+                {% if personal_info.email or personal_info.phone %}
+                    {{ personal_info.email or '' }}{% if personal_info.email and personal_info.phone %} | {% endif %}{{ personal_info.phone or '' }}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Education -->
+        {% if education %}
+        <div class="section">
+            <h2>Education</h2>
+            {% for edu in education %}
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title">{{ edu.university or '' }}{% if edu.university and (edu.degree or edu.major) %} - {% endif %}{{ edu.degree or '' }}{% if edu.degree and edu.major %} in {% endif %}{{ edu.major or '' }}</div>
+                    <div class="entry-date">{{ edu.year or '' }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Experience -->
+        {% if experience %}
+        <div class="section">
+            <h2>Experience</h2>
+            {% for job in experience %}
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title">{{ job.company or '' }}</div>
+                    <div class="entry-date">{{ job.start_date or '' }}{% if job.start_date and job.end_date %} - {% endif %}{{ job.end_date or '' }}</div>
+                </div>
+                {% if job.title %}
+                <div class="entry-subtitle">{{ job.title }}</div>
+                {% endif %}
+                {% if job.description %}
+                <ul class="entry-list">
+                    {% for item in job.description %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Projects -->
+        {% if projects %}
+        <div class="section">
+            <h2>Projects</h2>
+            {% for project in projects %}
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title">{{ project.name or '' }}</div>
+                    <div class="entry-date">{{ project.dates or project.date or '' }}</div>
+                </div>
+                {% if project.description %}
+                <ul class="entry-list">
+                    {% for item in project.description %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Research -->
+        {% if research %}
+        <div class="section">
+            <h2>Research</h2>
+            {% for item in research %}
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title">{{ item.title or '' }}</div>
+                    <div class="entry-date">{{ item.date or '' }}</div>
+                </div>
+                {% if item.description %}
+                <p>{{ item.description }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Skills -->
+        {% if skills %}
+        <div class="section">
+            <h2>Skills</h2>
+            <ul class="skills-list">
+                {% for skill in skills %}
+                <li>{{ skill }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Publications -->
+        {% if publications %}
+        <div class="section">
+            <h2>Publications</h2>
+            {% for pub in publications %}
+            <div class="entry">
+                <p>{{ pub.citation or '' }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Summary -->
+        {% if summary %}
+        <div class="section">
+            <h2>Summary</h2>
+            <p>{{ summary }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

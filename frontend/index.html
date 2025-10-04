@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Optimizer</title>
+    <!-- Include Quill stylesheet -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        /* Basic styling for the app */
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        textarea, input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        input[type="submit"], button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover, button:hover {
+            background-color: #45a049;
+        }
+        hr {
+            margin: 20px 0;
+        }
+        #editor {
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Resume Optimizer</h1>
+    <p style="color:grey; font-size: 0.9em;">For your privacy, personal identifiable information (such as emails and phone numbers) will be automatically redacted before processing.</p>
+    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+        <h2>Job Description</h2>
+        <textarea name="job_description" rows="10" cols="50"></textarea>
+        <h2>Resume</h2>
+        <input type="file" name="resume">
+        <br><br>
+        <input type="submit" value="Optimize Resume">
+    </form>
+
+    <hr>
+
+    <h2>Enhanced Resume</h2>
+    <div id="editor" style="height: 400px;"></div>
+    <br>
+    <label for="template-select">Choose a template:</label>
+    <select name="templates" id="template-select">
+        <option value="default.html">Default</option>
+    </select>
+    <button id="download-btn">Download as PDF</button>
+    <button id="preview-btn">Real-time Preview</button>
+
+    <div id="pdf-preview-container" style="display: none; margin-top: 20px;">
+        <h3>PDF Preview</h3>
+        <iframe id="pdf-preview-iframe" style="width: 100%; height: 500px; border: 1px solid #ccc;"></iframe>
+    </div>
+
+    <!-- Include the Quill library -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let enhancedResumeData = null;
+            var quill = new Quill('#editor', {
+                theme: 'snow'
+            });
+
+            document.getElementById('upload-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                quill.setText('Loading...');
+
+                fetch('/upload', {
+                    method: 'POST', 
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    enhancedResumeData = data.enhanced_resume; // <-- Correctly access the nested object
+                    let resumeHTML = '<div class="resume">';
+
+                    // Left Column
+                    resumeHTML += '<div class="left-column">';
+
+                    // Personal Info
+                    if (enhancedResumeData.personal_info) {
+                        resumeHTML += '<div class="personal-info">';
+                        resumeHTML += `<h1 class="name">${enhancedResumeData.personal_info.name || ''}</h1>`;
+                        resumeHTML += `<p class="contact">${enhancedResumeData.personal_info.email || ''} | ${enhancedResumeData.personal_info.phone || ''}</p>`;
+                        resumeHTML += '</div>';
+                    }
+
+                    // Skills
+                    if (enhancedResumeData.skills && enhancedResumeData.skills.length > 0) {
+                        resumeHTML += '<div class="skills-section">';
+                        resumeHTML += '<h2 class="section-title">Skills</h2>';
+                        resumeHTML += '<ul class="skills-list">';
+                        enhancedResumeData.skills.forEach(skill => {
+                            resumeHTML += `<li>${skill}</li>`;
+                        });
+                        resumeHTML += '</ul>';
+                        resumeHTML += '</div>';
+                    }
+
+                    // Education
+                    if (enhancedResumeData.education && enhancedResumeData.education.length > 0) {
+                        resumeHTML += '<div class="education-section">';
+                        resumeHTML += '<h2 class="section-title">Education</h2>';
+                        enhancedResumeData.education.forEach(edu => {
+                            resumeHTML += '<div class="education-item">';
+                            resumeHTML += `<p><strong>${edu.degree}</strong> in ${edu.major}</p>`;
+                            resumeHTML += `<p>${edu.university}, ${edu.year}</p>`;
+                            resumeHTML += '</div>';
+                        });
+                        resumeHTML += '</div>';
+                    }
+
+                    resumeHTML += '</div>'; // close .left-column
+
+                    // Right Column
+                    resumeHTML += '<div class="right-column">';
+
+                    // Summary
+                    if (enhancedResumeData.summary) {
+                        resumeHTML += '<div class="summary-section">';
+                        resumeHTML += '<h2 class="section-title">Summary</h2>';
+                        resumeHTML += `<p class="summary-text">${enhancedResumeData.summary}</p>`;
+                        resumeHTML += '</div>';
+                    }
+
+                    // Experience
+                    if (enhancedResumeData.experience && enhancedResumeData.experience.length > 0) {
+                        resumeHTML += '<div class="experience-section">';
+                        resumeHTML += '<h2 class="section-title">Experience</h2>';
+                        enhancedResumeData.experience.forEach(job => {
+                            resumeHTML += '<div class="job">';
+                            resumeHTML += `<h3 class="job-title">${job.title}</h3>`;
+                            resumeHTML += `<p class="company-info">${job.company} | ${job.start_date} - ${job.end_date}</p>`;
+                            resumeHTML += '<ul class="job-description">';
+                            job.description.forEach(point => {
+                                resumeHTML += `<li>${point}</li>`;
+                            });
+                            resumeHTML += '</ul>';
+                            resumeHTML += '</div>';
+                        });
+                        resumeHTML += '</div>';
+                    }
+
+                    // Projects
+                    if (enhancedResumeData.projects && enhancedResumeData.projects.length > 0) {
+                        resumeHTML += '<div class="projects-section">';
+                        resumeHTML += '<h2 class="section-title">Projects</h2>';
+                        enhancedResumeData.projects.forEach(project => {
+                            resumeHTML += '<div class="project">';
+                            resumeHTML += `<h3 class="project-name">${project.name}</h3>`;
+                            if (project.dates || project.date) {
+                                resumeHTML += `<p class="project-date">${project.dates || project.date}</p>`;
+                            }
+                            resumeHTML += '<ul class="project-description">';
+                            project.description.forEach(point => {
+                                resumeHTML += `<li>${point}</li>`;
+                            });
+                            resumeHTML += '</ul>';
+                            resumeHTML += '</div>';
+                        });
+                        resumeHTML += '</div>';
+                    }
+
+                    // Research
+                    if (enhancedResumeData.research && enhancedResumeData.research.length > 0) {
+                        resumeHTML += '<div class="research-section">';
+                        resumeHTML += '<h2 class="section-title">Research</h2>';
+                        enhancedResumeData.research.forEach(item => {
+                            resumeHTML += '<div class="research-item">';
+                            resumeHTML += `<h3 class="research-title">${item.title}</h3>`;
+                            if (item.date) {
+                                resumeHTML += `<p class="research-date">${item.date}</p>`;
+                            }
+                            if (item.description) {
+                                resumeHTML += `<p class="research-description">${item.description}</p>`;
+                            }
+                            resumeHTML += '</div>';
+                        });
+                        resumeHTML += '</div>';
+                    }
+
+                    resumeHTML += '</div>'; // close .right-column
+
+                    resumeHTML += '</div>'; // close .resume
+
+                    quill.setText(''); // Clear the editor
+                    quill.clipboard.dangerouslyPasteHTML(0, resumeHTML);
+                    enhancedResumeData.cleanHTML = resumeHTML; // Store clean HTML
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                    alert('Error optimizing resume. Please check the console for details.');
+                    quill.setText('Error generating resume.');
+                });
+            });
+
+            document.getElementById('download-btn').addEventListener('click', function() {
+                if (!enhancedResumeData) {
+                    alert("Please generate a resume first.");
+                    return;
+                }
+
+                // Send structured resume data instead of HTML
+                const resumeData = {
+                    personal_info: {
+                        name: enhancedResumeData.personal_info?.name || '',
+                        email: enhancedResumeData.personal_info?.email || '',
+                        phone: enhancedResumeData.personal_info?.phone || ''
+                    },
+                    summary: enhancedResumeData.summary || '',
+                    experience: enhancedResumeData.experience || [],
+                    projects: enhancedResumeData.projects || [],
+                    research: enhancedResumeData.research || [],
+                    education: enhancedResumeData.education || [],
+                    skills: enhancedResumeData.skills || [],
+                    publications: enhancedResumeData.publications || []
+                };
+
+                fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        resume_data: resumeData,
+                        template_name: document.getElementById('template-select').value
+                    })
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'resume.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => console.error('Error:', error));
+            });
+
+            document.getElementById('preview-btn').addEventListener('click', function() {
+                if (!enhancedResumeData) {
+                    alert("Please generate a resume first.");
+                    return;
+                }
+
+                // Send structured resume data instead of HTML
+                const resumeData = {
+                    personal_info: {
+                        name: enhancedResumeData.personal_info?.name || '',
+                        email: enhancedResumeData.personal_info?.email || '',
+                        phone: enhancedResumeData.personal_info?.phone || ''
+                    },
+                    summary: enhancedResumeData.summary || '',
+                    experience: enhancedResumeData.experience || [],
+                    projects: enhancedResumeData.projects || [],
+                    research: enhancedResumeData.research || [],
+                    education: enhancedResumeData.education || [],
+                    skills: enhancedResumeData.skills || [],
+                    publications: enhancedResumeData.publications || []
+                };
+
+                fetch('/api/preview-pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        resume_data: resumeData,
+                        template_name: document.getElementById('template-select').value
+                    })
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const previewContainer = document.getElementById('pdf-preview-container');
+                    const previewIframe = document.getElementById('pdf-preview-iframe');
+                    previewIframe.src = url;
+                    previewContainer.style.display = 'block';
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+</body>
+</html>
