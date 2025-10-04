@@ -148,7 +148,7 @@
                         resumeHTML += '</div>';
                     }
 
-                    // Experience
+                    // Experience (includes research positions)
                     if (enhancedResumeData.experience && enhancedResumeData.experience.length > 0) {
                         resumeHTML += '<div class="experience-section">';
                         resumeHTML += '<h2 class="section-title">Experience</h2>';
@@ -157,9 +157,15 @@
                             resumeHTML += `<h3 class="job-title">${job.title}</h3>`;
                             resumeHTML += `<p class="company-info">${job.company} | ${job.start_date} - ${job.end_date}</p>`;
                             resumeHTML += '<ul class="job-description">';
-                            job.description.forEach(point => {
-                                resumeHTML += `<li>${point}</li>`;
-                            });
+                            // 检查description是否为数组
+                            if (Array.isArray(job.description)) {
+                                job.description.forEach(point => {
+                                    resumeHTML += `<li>${point}</li>`;
+                                });
+                            } else if (job.description) {
+                                // 如果description是字符串，直接显示
+                                resumeHTML += `<li>${job.description}</li>`;
+                            }
                             resumeHTML += '</ul>';
                             resumeHTML += '</div>';
                         });
@@ -177,28 +183,16 @@
                                 resumeHTML += `<p class="project-date">${project.dates || project.date}</p>`;
                             }
                             resumeHTML += '<ul class="project-description">';
-                            project.description.forEach(point => {
-                                resumeHTML += `<li>${point}</li>`;
-                            });
+                            // 检查description是否为数组
+                            if (Array.isArray(project.description)) {
+                                project.description.forEach(point => {
+                                    resumeHTML += `<li>${point}</li>`;
+                                });
+                            } else if (project.description) {
+                                // 如果description是字符串，直接显示
+                                resumeHTML += `<li>${project.description}</li>`;
+                            }
                             resumeHTML += '</ul>';
-                            resumeHTML += '</div>';
-                        });
-                        resumeHTML += '</div>';
-                    }
-
-                    // Research
-                    if (enhancedResumeData.research && enhancedResumeData.research.length > 0) {
-                        resumeHTML += '<div class="research-section">';
-                        resumeHTML += '<h2 class="section-title">Research</h2>';
-                        enhancedResumeData.research.forEach(item => {
-                            resumeHTML += '<div class="research-item">';
-                            resumeHTML += `<h3 class="research-title">${item.title}</h3>`;
-                            if (item.date) {
-                                resumeHTML += `<p class="research-date">${item.date}</p>`;
-                            }
-                            if (item.description) {
-                                resumeHTML += `<p class="research-description">${item.description}</p>`;
-                            }
                             resumeHTML += '</div>';
                         });
                         resumeHTML += '</div>';
@@ -235,7 +229,6 @@
                     summary: enhancedResumeData.summary || '',
                     experience: enhancedResumeData.experience || [],
                     projects: enhancedResumeData.projects || [],
-                    research: enhancedResumeData.research || [],
                     education: enhancedResumeData.education || [],
                     skills: enhancedResumeData.skills || [],
                     publications: enhancedResumeData.publications || []
@@ -281,7 +274,6 @@
                     summary: enhancedResumeData.summary || '',
                     experience: enhancedResumeData.experience || [],
                     projects: enhancedResumeData.projects || [],
-                    research: enhancedResumeData.research || [],
                     education: enhancedResumeData.education || [],
                     skills: enhancedResumeData.skills || [],
                     publications: enhancedResumeData.publications || []

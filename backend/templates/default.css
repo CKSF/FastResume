@@ -11,16 +11,16 @@ body {
 }
 
 .resume {
-    max-width: 8.5in;
-    margin: 0 auto;
-    padding: 0 40px;
+    max-width: none;
+    margin: -0.3in 0 0 0;
+    padding: 0 -0.2in;
     box-sizing: border-box;
 }
 
 /* Header */
 .header {
     text-align: center;
-    margin-bottom: 0.8em;
+    margin-bottom: 0.1em;
 }
 
 h1 {
@@ -47,7 +47,7 @@ h2 {
 
 /* Entry containers */
 .entry {
-    margin-bottom: 0.6em;
+    margin-bottom: 0.4em;
 }
 
 .entry-header {
@@ -100,8 +100,16 @@ h2 {
 
 /* Section spacing */
 .section {
-    margin-bottom: 0.8em;
+    margin-bottom: 0.6em;
 }
+
+@page {
+    margin-top: 0.75in;
+    margin-bottom: 0.15in;  /* 控制底部边距，数值越小文字越靠近页面底部 */
+    margin-left: 0.75in;
+    margin-right: 0.75in;
+}
+
 
 /* Print optimization */
 @media print {
@@ -112,7 +120,7 @@ h2 {
     
     .resume {
         max-width: none;
-        margin: 0;
-        padding: 0 0.5in;
+        margin: -0.5in 0 -0.5in 0;  /* 上下边距统一为-0.5英寸 */
+        padding: 0 -0.3in;
     }
 }
