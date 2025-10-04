@@ -40,6 +40,7 @@ def generate_pdf_from_template(resume_data, template_name, output_path=None):
                                      education=resume_data.get('education', []),
                                      skills=resume_data.get('skills', []),
                                      publications=resume_data.get('publications', []),
+                                     section_order=resume_data.get('section_order', ['summary', 'experience', 'projects', 'education', 'skills', 'publications']),
                                      css_content=css_content)
         
         # Debug: Save HTML to file for inspection

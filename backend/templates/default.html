@@ -19,70 +19,89 @@
             </div>
         </div>
 
-        <!-- Education -->
-        {% if education %}
-        <div class="section">
-            <h2>Education</h2>
-            {% for edu in education %}
-            <div class="entry">
-                <div class="entry-header">
-                    <div class="entry-title">{{ edu.university or '' }}{% if edu.university and (edu.degree or edu.major) %} - {% endif %}{{ edu.degree or '' }}{% if edu.degree and edu.major %} in {% endif %}{{ edu.major or '' }}</div>
-                    <div class="entry-date">{{ edu.year or '' }}</div>
+        <!-- Dynamic Sections based on section_order -->
+        {% for section_name in section_order %}
+            {% if section_name == 'summary' and summary %}
+                <div class="section">
+                    <h2>Summary</h2>
+                    <p>{{ summary }}</p>
                 </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Experience -->
-        {% if experience %}
-        <div class="section">
-            <h2>Experience</h2>
-            {% for job in experience %}
-            <div class="entry">
-                <div class="entry-header">
-                    <div class="entry-title">{{ job.company or '' }}</div>
-                    <div class="entry-date">{{ job.start_date or '' }}{% if job.start_date and job.end_date %} - {% endif %}{{ job.end_date or '' }}</div>
-                </div>
-                {% if job.title %}
-                <div class="entry-subtitle">{{ job.title }}</div>
-                {% endif %}
-                {% if job.description %}
-                <ul class="entry-list">
-                    {% for item in job.description %}
-                    <li>{{ item }}</li>
+            {% elif section_name == 'experience' and experience %}
+                <div class="section">
+                    <h2>Experience</h2>
+                    {% for job in experience %}
+                    <div class="entry">
+                        <div class="entry-header">
+                            <div class="entry-title">{{ job.company or '' }}</div>
+                            <div class="entry-date">{{ job.start_date or '' }}{% if job.start_date and job.end_date %} - {% endif %}{{ job.end_date or '' }}</div>
+                        </div>
+                        {% if job.title %}
+                        <div class="entry-subtitle">{{ job.title }}</div>
+                        {% endif %}
+                        {% if job.description %}
+                        <ul class="entry-list">
+                            {% for item in job.description %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
                     {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Projects -->
-        {% if projects %}
-        <div class="section">
-            <h2>Projects</h2>
-            {% for project in projects %}
-            <div class="entry">
-                <div class="entry-header">
-                    <div class="entry-title">{{ project.name or '' }}</div>
-                    <div class="entry-date">{{ project.dates or project.date or '' }}</div>
                 </div>
-                {% if project.description %}
-                <ul class="entry-list">
-                    {% for item in project.description %}
-                    <li>{{ item }}</li>
+            {% elif section_name == 'projects' and projects %}
+                <div class="section">
+                    <h2>Projects</h2>
+                    {% for project in projects %}
+                    <div class="entry">
+                        <div class="entry-header">
+                            <div class="entry-title">{{ project.name or '' }}</div>
+                            <div class="entry-date">{{ project.dates or project.date or '' }}</div>
+                        </div>
+                        {% if project.description %}
+                        <ul class="entry-list">
+                            {% for item in project.description %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
                     {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+                </div>
+            {% elif section_name == 'education' and education %}
+                <div class="section">
+                    <h2>Education</h2>
+                    {% for edu in education %}
+                    <div class="entry">
+                        <div class="entry-header">
+                            <div class="entry-title">{{ edu.university or '' }}{% if edu.university and (edu.degree or edu.major) %} - {% endif %}{{ edu.degree or '' }}{% if edu.degree and edu.major %} in {% endif %}{{ edu.major or '' }}</div>
+                            <div class="entry-date">{{ edu.year or '' }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% elif section_name == 'skills' and skills %}
+                <div class="section">
+                    <h2>Skills</h2>
+                    <ul class="skills-list">
+                        {% for skill in skills %}
+                        <li>{{ skill }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% elif section_name == 'publications' and publications %}
+                <div class="section">
+                    <h2>Publications</h2>
+                    {% for pub in publications %}
+                    <div class="entry">
+                        <p>{{ pub.citation or '' }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
 
-        <!-- Research -->
-        {% if research %}
+        <!-- Research (if not in section_order, show at end) -->
+        {% if research and 'research' not in section_order %}
         <div class="section">
             <h2>Research</h2>
             {% for item in research %}
@@ -96,38 +115,6 @@
                 {% endif %}
             </div>
             {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Skills -->
-        {% if skills %}
-        <div class="section">
-            <h2>Skills</h2>
-            <ul class="skills-list">
-                {% for skill in skills %}
-                <li>{{ skill }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-
-        <!-- Publications -->
-        {% if publications %}
-        <div class="section">
-            <h2>Publications</h2>
-            {% for pub in publications %}
-            <div class="entry">
-                <p>{{ pub.citation or '' }}</p>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Summary -->
-        {% if summary %}
-        <div class="section">
-            <h2>Summary</h2>
-            <p>{{ summary }}</p>
         </div>
         {% endif %}
     </div>

@@ -151,5 +151,98 @@ def preview_pdf():
             logging.error(f"Error generating PDF preview: {e}")
             return jsonify({"error": str(e)}), 500
 
+# API v1 端点 - 为LLM提供简历生成服务
+@app.route('/api/v1/generate-resume', methods=['POST'])
+def generate_resume_api():
+    """
+    为LLM提供的简历生成API端点
+    接受文件、职位描述和模板参数，返回优化后的简历数据
+    """
+    try:
+        # 获取请求数据
+        job_description = request.form.get('job_description') or request.json.get('job_description')
+        template_name = request.form.get('template', 'default') or request.json.get('template', 'default')
+        
+        # 处理文件上传
+        resume_file = None
+        resume_text = None
+        
+        if 'resume' in request.files:
+            resume_file = request.files['resume']
+            resume_text = parse_file(resume_file)
+        elif 'resume_text' in (request.json or {}):
+            resume_text = request.json['resume_text']
+        
+        # 验证必需参数
+        if not job_description:
+            return jsonify({"error": "job_description is required"}), 400
+        if not resume_text:
+            return jsonify({"error": "resume file or resume_text is required"}), 400
+
+        # 提取关键词
+        keywords = extract_keywords(job_description)
+        keywords_str = ', '.join(keywords)
+
+        # 解析简历结构
+        parsed_resume = parse_dynamic_resume(resume_text)
+        if not parsed_resume:
+            return jsonify({"error": "Failed to parse resume structure"}), 400
+
+        # 增强简历
+        enhanced_resume = enhance_resume(parsed_resume, keywords_str)
+        if not enhanced_resume:
+            return jsonify({"error": "Failed to enhance resume"}), 400
+
+        # 返回结构化数据
+        return jsonify({
+            "success": True,
+            "data": {
+                "enhanced_resume": enhanced_resume,
+                "template": template_name,
+                "keywords": keywords,
+                "personal_info": enhanced_resume.get('personal_info', {}),
+                "sections": {
+                    "summary": enhanced_resume.get('summary', ''),
+                    "experience": enhanced_resume.get('experience', []),
+                    "projects": enhanced_resume.get('projects', []),
+                    "education": enhanced_resume.get('education', []),
+                    "skills": enhanced_resume.get('skills', []),
+                    "publications": enhanced_resume.get('publications', [])
+                }
+            }
+        })
+
+    except Exception as e:
+        logging.error(f"Error in generate_resume_api: {e}")
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+@app.route('/api/v1/templates', methods=['GET'])
+def get_templates_api():
+    """
+    返回可用模板列表的API端点
+    """
+    try:
+        templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
+        templates = []
+        
+        if os.path.exists(templates_dir):
+            for file in os.listdir(templates_dir):
+                if file.endswith('.html'):
+                    template_name = file.replace('.html', '')
+                    templates.append({
+                        "name": template_name,
+                        "display_name": template_name.title(),
+                        "file": file
+                    })
+        
+        return jsonify({
+            "success": True,
+            "templates": templates
+        })
+    
+    except Exception as e:
+        logging.error(f"Error in get_templates_api: {e}")
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)
