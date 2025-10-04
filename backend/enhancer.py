@@ -3,9 +3,18 @@ import json
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import logging
+import os
+from dotenv import load_dotenv
 
-# TODO: Replace with your Google Cloud API key
-genai.configure(api_key="AIzaSyDmfj1Oktw-3mEQb8kJvcC5Orm70iOEBa8")
+# 加载环境变量
+load_dotenv()
+
+# 从环境变量获取API密钥
+api_key = os.getenv('GOOGLE_API_KEY')
+if not api_key:
+    raise ValueError("GOOGLE_API_KEY environment variable is not set")
+
+genai.configure(api_key=api_key)
 
 def enhance_resume(resume_data, keywords):
     """
