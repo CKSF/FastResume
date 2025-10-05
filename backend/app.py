@@ -1,6 +1,7 @@
 import logging
 import os
 from flask import Flask, render_template, request, jsonify, send_from_directory, after_this_request, send_file
+from flask_cors import CORS
 from jd_parser import extract_keywords
 from dynamic_parser import parse_dynamic_resume
 from enhancer import enhance_resume
@@ -10,6 +11,7 @@ from file_parser import parse_file # <-- New import
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__, template_folder='templates')
+CORS(app)  # 启用CORS支持
 
 @app.route('/')
 def index():
@@ -106,6 +108,9 @@ def preview_pdf():
         resume_data = data.get('resume_data')
         template_name = data.get('template', 'default')
         
+        # 直接使用前端发送的数据，不使用临时文件缓存
+        # 这样可以确保checkbox状态的变化能够立即反映在PDF预览中
+        
         try:
             pdf_file = generate_pdf_from_template(resume_data, template_name)
             return send_file(
@@ -116,6 +121,44 @@ def preview_pdf():
         except Exception as e:
             logging.error(f"Error generating PDF preview: {e}")
             return jsonify({"error": str(e)}), 500
+
+# New API endpoints for temp file management
+@app.route('/api/temp-data/<session_id>', methods=['GET'])
+def get_temp_data(session_id):
+    """获取临时存储的简历数据"""
+    try:
+        temp_dir = os.path.join(os.path.dirname(__file__), 'temp')
+        temp_data_path = os.path.join(temp_dir, f"resume_data_{session_id}.json")
+        
+        if not os.path.exists(temp_data_path):
+            return jsonify({"error": "Session not found"}), 404
+        
+        import json
+        with open(temp_data_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return jsonify(data)
+    except Exception as e:
+        logging.error(f"Error reading temp data: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/temp-data/<session_id>', methods=['PUT'])
+def update_temp_data(session_id):
+    """更新临时存储的简历数据"""
+    try:
+        temp_dir = os.path.join(os.path.dirname(__file__), 'temp')
+        temp_data_path = os.path.join(temp_dir, f"resume_data_{session_id}.json")
+        
+        data = request.json
+        
+        import json
+        with open(temp_data_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        logging.error(f"Error updating temp data: {e}")
+        return jsonify({"error": str(e)}), 500
     else:
         # Legacy approach: use HTML content directly
         html_content = data.get('html_content')

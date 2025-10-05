@@ -21,12 +21,12 @@
 
         <!-- Dynamic Sections based on section_order -->
         {% for section_name in section_order %}
-            {% if section_name == 'summary' and summary %}
+            {% if section_name == 'summary' and summary and summary|length > 0 %}
                 <div class="section">
                     <h2>Summary</h2>
                     <p>{{ summary }}</p>
                 </div>
-            {% elif section_name == 'experience' and experience %}
+            {% elif section_name == 'experience' and experience and experience|length > 0 %}
                 <div class="section">
                     <h2>Experience</h2>
                     {% for job in experience %}
@@ -48,7 +48,7 @@
                     </div>
                     {% endfor %}
                 </div>
-            {% elif section_name == 'projects' and projects %}
+            {% elif section_name == 'projects' and projects and projects|length > 0 %}
                 <div class="section">
                     <h2>Projects</h2>
                     {% for project in projects %}
@@ -67,7 +67,7 @@
                     </div>
                     {% endfor %}
                 </div>
-            {% elif section_name == 'education' and education %}
+            {% elif section_name == 'education' and education and education|length > 0 %}
                 <div class="section">
                     <h2>Education</h2>
                     {% for edu in education %}
@@ -79,7 +79,7 @@
                     </div>
                     {% endfor %}
                 </div>
-            {% elif section_name == 'skills' and skills %}
+            {% elif section_name == 'skills' and skills and skills|length > 0 %}
                 <div class="section">
                     <h2>Skills</h2>
                     <ul class="skills-list">
@@ -88,7 +88,7 @@
                         {% endfor %}
                     </ul>
                 </div>
-            {% elif section_name == 'publications' and publications %}
+            {% elif section_name == 'publications' and publications and publications|length > 0 %}
                 <div class="section">
                     <h2>Publications</h2>
                     {% for pub in publications %}
