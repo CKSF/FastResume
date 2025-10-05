@@ -15,11 +15,32 @@ GenResume/
 │   ├── file_parser.py   # 文件解析器
 │   ├── jd_parser.py     # 职位描述解析器
 │   ├── pdf_generator.py # PDF生成器
+│   ├── requirements.txt # 后端依赖包
 │   └── templates/       # HTML模板
+│       ├── default.html    # 默认简历模板
+│       ├── default.css     # 模板样式
+│       └── test.html       # 测试模板
 ├── frontend/         # HTML/JS前端
+│   ├── index.html       # 主页面
+│   ├── css/            # 样式文件
+│   │   └── styles.css     # 主样式表
+│   └── js/             # JavaScript模块
+│       ├── main.js        # 主应用逻辑
+│       ├── resumeGeneration.js # 简历生成
+│       ├── preview.js     # PDF预览
+│       ├── dragDrop.js    # 拖拽排序
+│       ├── tempContent.js # 临时数据管理
+│       ├── utils.js       # 工具函数
+│       └── config.js      # 配置文件
 ├── test/            # 测试模块
+│   ├── __init__.py     # 测试包初始化
 │   ├── test_llm.py     # API功能测试
 │   └── monitor.py      # 系统监控测试
+├── requirements.txt  # 项目依赖包
+├── README.md        # 项目文档
+├── LICENSE          # 开源许可证
+├── .gitignore       # Git忽略文件
+├── .env.example     # 环境变量示例
 └── .venv/           # Python虚拟环境
 ```
 
